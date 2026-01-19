@@ -1,2 +1,1 @@
-# lvqingrui.github.io
-my blog
+blog for me
