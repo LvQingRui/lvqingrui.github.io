@@ -2,11 +2,33 @@
     text-align: center;
 }
 
-p {
-    display: block;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    unicode-bidi: isolate;
+td {
+    vertical-align: top;
+}
+
+.main-table td {
+    padding: 10px;
+}
+
+.main-table {
+    border-collapse: collapse;
+}
+
+.main-table td + td {
+    border-left: 1px solid #ccc;
+}
+
+
+a {
+    color: #00E;
+    text-decoration: none;
+}
+
+/*访问过的a标签*/
+a:visited {
+    color: #00E;
+}
+
+a:hover {
+    text-decoration: underline;
 }
