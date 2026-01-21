@@ -1,5 +1,19 @@
-.heading {
+body {
+    max-width: 95ch;
+    margin: auto;
+    padding: 0.5em;
+}
+
+.heading, h1 {
     text-align: center;
+}
+
+.small {
+    font-size: 90%;
+}
+
+dd {
+    margin: 2px 0 1em;
 }
 
 td {
@@ -18,15 +32,24 @@ td {
     border-left: 1px solid #ccc;
 }
 
-
-a {
-    color: #00E;
-    text-decoration: none;
+.sub-table {
+    width: 100%;
+    table-layout: fixed; /* ★ 非常重要 */
 }
 
-/*访问过的a标签*/
-a:visited {
+.sub-table col.left-col {
+    width: 68ch; /* 控制“算法”这一列 */
+}
+
+.sub-table col.right-col {
+    width: auto; /* 另一列自适应 */
+}
+
+
+/* 推荐加：链接风格更像学术站 */
+a, a:visited {
     color: #00E;
+    text-decoration: none;
 }
 
 a:hover {
