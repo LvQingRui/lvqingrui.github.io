@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>filter与map的一次遍历性</title>
+    <link href="../styles/base.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <h1>filter与map的一次遍历性</h1>
+    <p>
+      在今天上课的时候，讲到filter和map函数的时候，我发现了一个神奇的东西，在以前刷算法的时候也一直用这两个函数，但是并没有注意到这一点——那就是他们的一次遍历性。
+    </p>
+    <p>filter 返回的迭代器只能遍历一次，遍历后就会 “耗尽”，下面是实例：</p>
+    <h2>filter函数</h2>
+    <pre><code>
+# 定义过滤条件：筛选偶数
+def is_even(n):
+    return n % 2 == 0
+    
+filter_obj = filter(is_even, [1, 2, 3, 4, 5])
+
+# 第一次遍历：有结果
+print(list(filter_obj))  # 输出: [2, 4]
+# 第二次遍历：迭代器已空，无结果
+print(list(filter_obj))  # 输出: []
+    </code></pre>
+    <h2>map函数</h2>
+    <pre><code>
+# 定义映射函数：将数字乘以10
+def multiply_by_10(n):
+    return n * 10
+
+# 创建map迭代器：对列表中的每个元素执行乘10操作
+map_obj = map(multiply_by_10, [1, 2, 3, 4, 5])
+
+# 第一次遍历：迭代器有数据，正常输出转换后的结果
+print("第一次遍历map迭代器：", list(map_obj))  # 输出: [10, 20, 30, 40, 50]
+
+# 第二次遍历：迭代器已被耗尽，返回空列表
+print("第二次遍历map迭代器：", list(map_obj))  # 输出: []
+    </code></pre>
+    <h2>出现此类情况的原因</h2>
+    <p>
+      再讲清楚原因之前，我们需要了解什么是惰性迭代器，以及惰性迭代器的底层原理，也是为什么这两个函数有一次遍历性的主要原因了。
+    </p>
+    <h2>惰性迭代器</h2>
+    <p>惰性迭代器（Lazy Iterator） 是 Python 中一种 “懒加载” 的可迭代对象。</p>
+    <ul>
+      <li>
+        惰性 =「不提前干活」：创建迭代器时，不会立刻计算 / 生成所有结果，而是
+        “记着要做的事”；
+      </li>
+      <li>
+        迭代 =「用的时候才做」：只有在遍历（比如 list()/for 循环 /next()）
+        时，才会逐个生成结果；
+      </li>
+    </ul>
+    <h2>惰性迭代器的底层原理（原因）</h2>
+    <h3>1. 迭代器的状态：有一个 “遍历指针”</h3>
+    <p>
+      迭代器内部维护着一个“指针”（也叫 “游标”），记录当前遍历到的位置：
+      <ul>
+       <li>初始状态：指针指向数据源的第一个元素（比如 map 里的 [1,2,3] 的第一个元素</li>       
+       <li>遍历一次[调用next()]：指针向前移动一位，生成当前元素的结果，不保存历史结果；</li>     
+       <li>遍历结束：指针移动到数据源末尾，标记为“已耗尽”。</li>
+      </ul>
+    </p>
+    <h3>2. 迭代器的「协议」：__iter__() + __next__()</h3>
+
+    <p>
+        Python 中所有迭代器都遵守「迭代器协议」，核心是两个方法：
+    <ul>
+    <li>__iter__()：返回迭代器自身（让迭代器能被 for 循环遍历）；</li>
+    <li>__next__()：返回下一个元素的结果，当没有元素时抛出 StopIteration 异常。</li>
+    </ul>
+    <br>
+    <p>模拟一下：</p>
+    <pre><code>
+# 定义map迭代器
+def multiply_by_10(n):
+    return n * 10
+map_obj = map(multiply_by_10, [1,2,3])
+
+# 手动调用next()，模拟遍历过程
+print(next(map_obj))  # 指针指向1 → 计算1*10 → 返回10（指针移到2）
+print(next(map_obj))  # 指针指向2 → 计算2*10 → 返回20（指针移到3）
+print(next(map_obj))  # 指针指向3 → 计算3*10 → 返回30（指针移到末尾）
+print(next(map_obj))  # 指针已到末尾 → 抛出StopIteration异常
+    </code></pre>
+    <p>运行结果:</p>
+    <pre><code>
+10
+20
+30
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+    </code></pre>
+    </p>
+
+<h2>哪些对象是惰性的迭代器？</h2>
+<p>除了 map/filter，Python 中这些常见对象也是惰性迭代器：</p>
+<ul><li>zip()：打包多个可迭代对象，遍历才生成元组；</li>
+<li>enumerate()：生成索引 + 元素，遍历才计算；</li>
+<li>生成器表达式：(x*10 for x in [1,2,3])（注意是圆括号，不是列表推导）；</li>
+<li>文件对象：open("test.txt")（遍历才逐行读取，读完指针到末尾）；</li>
+<li>range()（Python 3）：不再生成列表，而是惰性的 range 对象。</li>
+</ul>
+
+<h2>如何解决一次遍历的问题呢？</h2>
+<p>其实很简单，就是把他们转化为可复用的对象就行了，比如说list、tuple等。</p>
+  </body>
+</html>
